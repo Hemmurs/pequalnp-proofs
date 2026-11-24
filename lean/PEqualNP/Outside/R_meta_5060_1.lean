@@ -57,7 +57,10 @@ theorem PEqualNP.Outside.R_meta_5060_1
            PEqualNP.AndCount.AndCountCircuit.sideTrue U (c.rightVars i) (c.rightGates i) i (c.gateValFuel U d)) := rfl
         rw [h0, Bool.and_eq_true] at h
         obtain ⟨hl, hr⟩ := h
-        simp only [PEqualNP.AndCount.AndCountCircuit.sideTrue, decide_eq_true_eq] at hl hr
+        have hside : ∀ (B : Finset (Fin 42)) (F : Finset (Fin c.size)),
+            PEqualNP.AndCount.AndCountCircuit.sideTrue U B F i (c.gateValFuel U d) =
+              decide ((∃ v ∈ B, v ∈ U) ∨ ∃ j ∈ F, j < i ∧ c.gateValFuel U d j = true) := fun _ _ => rfl
+        rw [hside, decide_eq_true_eq] at hl hr
         rcases hl with ⟨a, ha, haU⟩ | ⟨j, _, _, hj⟩
         · rcases hr with ⟨b, hb, hbU⟩ | ⟨j, _, _, hj⟩
           · exact ⟨i, a, ha, b, hb, haU, hbU⟩
@@ -76,7 +79,9 @@ theorem PEqualNP.Outside.R_meta_5060_1
       have hadj : G.Adj e.1 e.2 := (hAdj e.1 e.2).mpr ⟨hne, Or.inl hr⟩
       have hev : c.eval {e.1, e.2} = true :=
         (hC {e.1, e.2}).mpr ⟨e.1, by simp, e.2, by simp, hadj⟩
-      simp only [PEqualNP.AndCount.AndCountCircuit.eval, decide_eq_true_eq, hOut] at hev
+      have hevd : c.eval {e.1, e.2} =
+          decide ((∃ v ∈ c.outVars, v ∈ ({e.1, e.2} : Finset (Fin 42))) ∨ ∃ j ∈ c.outGates, c.gateVal {e.1, e.2} j = true) := rfl
+      rw [hevd, decide_eq_true_eq, hOut] at hev
       rcases hev with ⟨v, hv, _⟩ | ⟨j, _, hj⟩
       · exact absurd hv (by simp)
       · obtain ⟨k, a, ha, b, hb, haU, hbU⟩ := key {e.1, e.2} c.size j hj
