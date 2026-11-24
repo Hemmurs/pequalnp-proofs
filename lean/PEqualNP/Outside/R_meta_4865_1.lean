@@ -27,15 +27,15 @@ theorem PEqualNP.Outside.R_meta_4865_1
       omega
     have huw : G.Adj u w := hw
     have hne : u ≠ v := huv.ne'
+    have gF : ∀ x : Fin n → Bool, PEqualNP.MetaComplexity.NestedCover.graphFun G A x = (decide (∃ a ∈ A, x a = true) || decide (∃ u v, G.Adj u v ∧ x u = true ∧ x v = true)) := fun _ => rfl
     refine ⟨fun _ => false, fun z => decide (z = u ∨ z = w), ?_⟩
     have e1 : PEqualNP.MetaComplexity.NestedCover.graphFun G A (Function.update (fun _ => false) v false) = false := by
       have : Function.update (fun _ : Fin n => false) v false = fun _ => false := by
         funext z; simp [Function.update_apply]
-      rw [this]
-      simp [PEqualNP.MetaComplexity.NestedCover.graphFun]
+      rw [this, gF]
+      simp
     have e2 : PEqualNP.MetaComplexity.NestedCover.graphFun G A (Function.update (fun z => decide (z = u ∨ z = w)) v false) = true := by
-      unfold PEqualNP.MetaComplexity.NestedCover.graphFun
-      rw [Bool.or_eq_true]
+      rw [gF, Bool.or_eq_true]
       right
       rw [decide_eq_true_eq]
       refine ⟨u, w, huw, ?_, ?_⟩
@@ -121,6 +121,9 @@ theorem PEqualNP.Outside.R_meta_4865_1
     intro x
     rw [hval, ← hcomp]
     rfl
+  have evA : ∀ l : List Bool, PEqualNP.CircuitLowerBounds.GateOp.eval PEqualNP.CircuitLowerBounds.GateOp.and l = l.all id := fun _ => rfl
+  have evO : ∀ l : List Bool, PEqualNP.CircuitLowerBounds.GateOp.eval PEqualNP.CircuitLowerBounds.GateOp.or l = l.any id := fun _ => rfl
+  have evN : ∀ l : List Bool, PEqualNP.CircuitLowerBounds.GateOp.eval PEqualNP.CircuitLowerBounds.GateOp.not l = !(l.headD false) := fun _ => rfl
   have gl0 : ∀ (g : PEqualNP.CircuitLowerBounds.Gate), g.op ∈ ({PEqualNP.CircuitLowerBounds.GateOp.and, PEqualNP.CircuitLowerBounds.GateOp.or, PEqualNP.CircuitLowerBounds.GateOp.not} : Set PEqualNP.CircuitLowerBounds.GateOp) → g.inputs.length ≤ 2 → ∀ (q : ℕ) (c : Bool), q ∈ eff g → (∃ b : Bool, ∀ ρ : ℕ → Bool, ρ q = c → g.op.eval (g.inputs.map ρ) = b) ∨ (∃ w : ℕ, ∀ ρ : ℕ → Bool, ρ q = c → g.op.eval (g.inputs.map ρ) = ρ w) := by
     intro g hop hlen q c hq
     rw [heff] at hq
@@ -128,42 +131,42 @@ theorem PEqualNP.Outside.R_meta_4865_1
     cases op with
     | and =>
       rcases inputs with _ | ⟨a, _ | ⟨b, _ | ⟨d, l⟩⟩⟩
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
+      · simp [evA, evO, evN] at hq
+      · simp [evA, evO, evN] at hq
         subst hq
-        exact Or.inl ⟨c, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
+        exact Or.inl ⟨c, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
+      · simp [evA, evO, evN] at hq
         cases c with
         | false =>
           exact Or.inl ⟨false, fun ρ hρ => by
-            rcases hq with rfl | rfl <;> simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
+            rcases hq with rfl | rfl <;> simp [evA, evO, evN, hρ]⟩
         | true =>
           rcases hq with rfl | rfl
-          · exact Or.inr ⟨b, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
-          · exact Or.inr ⟨a, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
+          · exact Or.inr ⟨b, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
+          · exact Or.inr ⟨a, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
       · simp at hlen
     | or =>
       rcases inputs with _ | ⟨a, _ | ⟨b, _ | ⟨d, l⟩⟩⟩
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
+      · simp [evA, evO, evN] at hq
+      · simp [evA, evO, evN] at hq
         subst hq
-        exact Or.inl ⟨c, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
+        exact Or.inl ⟨c, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
+      · simp [evA, evO, evN] at hq
         cases c with
         | true =>
           exact Or.inl ⟨true, fun ρ hρ => by
-            rcases hq with rfl | rfl <;> simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
+            rcases hq with rfl | rfl <;> simp [evA, evO, evN, hρ]⟩
         | false =>
           rcases hq with rfl | rfl
-          · exact Or.inr ⟨b, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
-          · exact Or.inr ⟨a, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
+          · exact Or.inr ⟨b, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
+          · exact Or.inr ⟨a, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
       · simp at hlen
     | not =>
       rcases inputs with _ | ⟨a, l⟩
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
-      · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
+      · simp [evA, evO, evN] at hq
+      · simp [evA, evO, evN] at hq
         subst hq
-        exact Or.inl ⟨!c, fun ρ hρ => by simp [PEqualNP.CircuitLowerBounds.GateOp.eval, hρ]⟩
+        exact Or.inl ⟨!c, fun ρ hρ => by simp [evA, evO, evN, hρ]⟩
     | mod m => simp at hop
     | maj => simp at hop
   have gnot : ∀ (g : PEqualNP.CircuitLowerBounds.Gate), g.op = PEqualNP.CircuitLowerBounds.GateOp.not → ∀ q : ℕ, q ∈ eff g → ∀ ρ : ℕ → Bool, g.op.eval (g.inputs.map ρ) = !ρ q := by
@@ -173,10 +176,10 @@ theorem PEqualNP.Outside.R_meta_4865_1
     dsimp only at hop
     subst hop
     rcases inputs with _ | ⟨a, l⟩
-    · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
-    · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
+    · simp [evA, evO, evN] at hq
+    · simp [evA, evO, evN] at hq
       subst hq
-      simp [PEqualNP.CircuitLowerBounds.GateOp.eval]
+      simp [evA, evO, evN]
   have gnot1 : ∀ (g : PEqualNP.CircuitLowerBounds.Gate), g.op = PEqualNP.CircuitLowerBounds.GateOp.not → ∀ q q' : ℕ, q ∈ eff g → q' ∈ eff g → q = q' := by
     intro g hop q q' hq hq'
     rw [heff] at hq hq'
@@ -184,8 +187,8 @@ theorem PEqualNP.Outside.R_meta_4865_1
     dsimp only at hop
     subst hop
     rcases inputs with _ | ⟨a, l⟩
-    · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq
-    · simp [PEqualNP.CircuitLowerBounds.GateOp.eval] at hq hq'
+    · simp [evA, evO, evN] at hq
+    · simp [evA, evO, evN] at hq hq'
       rw [hq, hq']
   have gor : ∀ (g : PEqualNP.CircuitLowerBounds.Gate), g.op = PEqualNP.CircuitLowerBounds.GateOp.or → ∀ q : ℕ, q ∈ eff g → ∀ ρ : ℕ → Bool, ρ q = true → g.op.eval (g.inputs.map ρ) = true := by
     intro g hop q hq ρ hρ
